@@ -1,11 +1,12 @@
+#include "ext_sort.h"
+
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
 #include <climits>
 #include <ctime>
 #include <string>
-
-#include "ext_sort.h"
+#include <iostream>
 
 #define R_OK    1
 #define R_ERROR 0
@@ -13,7 +14,7 @@
 __attribute__((unused)) uint8_t generateFile(int64_t ramByte) {
     FILE* fp;
     uint64_t fSize = ramByte * 4;
-    fp             = fopen("test.txt", "w");
+    fp             = fopen("test_old.txt", "w");
     srandom(std::time(nullptr));
     for(int64_t i = 0; i < fSize;) {
         uint8_t strLen = rand() % (15 - 3) + 3;  // NOLINT(cert-msc30-c, cert-msc50-cpp)
@@ -42,15 +43,20 @@ int main(int argc, char* argv[]) {
     const int64_t ramByte = strtol(argv[2], (char**) &endptr, 10);
     if(ramByte == 0) {
         if(errno == EINVAL) {
+            std::cout << "Error:" << errno << std::endl;
             return R_ERROR;
         }
     }
     if(ramByte == LONG_MIN || ramByte == LONG_MAX) {
         if(errno == ERANGE) {
+            std::cout << "Error:" << errno << std::endl;
             return R_ERROR;
         }
     }
     //    generateFile(ramByte);
-    extSort(fname, ramByte);
+    if(!extSort(fname, ramByte)) {
+        return R_ERROR;
+    }
+    std::cout << "Output file: out.txt" << std::endl;
     return R_OK;
 }
